@@ -1,7 +1,51 @@
 ---
-k3s_version: v1.22.3+k3s1
-ansible_user: debian
+k3s_version: v1.24.9+k3s2
+# this is the user that has ssh access to these machines
+ansible_user: ansibleuser
 systemd_dir: /etc/systemd/system
+
 master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
-extra_server_args: ""
-extra_agent_args: ""
+
+# Set your timezone
+system_timezone: "Your/Timezone"
+
+# interface which will be used for flannel
+flannel_iface: "eth0"
+
+# k3s_token is required  masters can talk together securely
+# this token should be alpha numeric only
+#k3s_token: "K1096d62274c8d8d7c34ed0d1113c88ed6e5634f7933e021a14dbe344a19018ff42::server:fed0c9fdf65c46c163020b6794378318"
+k3s_token: "fed0c9fdf65c46c163020b6794378318"
+
+# The IP on which the node is reachable in the cluster.
+# Here, a sensible default is provided, you can still override
+# it for each of your hosts, though.
+k3s_node_ip: '{{ ansible_facts[flannel_iface]["ipv4"]["address"] }}'
+
+# Disable the taint manually by setting: k3s_master_taint = false
+# k3s_master_taint: "{{ true if groups['node'] | default([]) | length >= 1 else false }}"
+k3s_master_taint: false
+
+# these arguments are recommended for servers as well as agents:
+extra_args: >-
+  --flannel-iface={{ flannel_iface }}
+  --node-ip={{ k3s_node_ip }}
+
+# change these to your liking, the only required are: --disable servicelb, --tls-san {{ apiserver_endpoint }}
+extra_server_args: >-
+  {{ extra_args }}
+  {{ '--node-taint node-role.kubernetes.io/master=true:NoSchedule' if k3s_master_taint else '' }}
+  --disable traefik
+  --disable servicelb
+  --kube-apiserver-arg service-node-port-range=1-65535
+  --write-kubeconfig-mode 644
+  --datastore-endpoint "mysql://k3s:k3spassword@tcp(192.168.148.100:3306)/k3s_cluster"
+
+extra_agent_args: >-
+  {{ extra_args }}
+
+registry_server_location: http://192.168.148.100
+
+node_password_salt: 7b5bbc6644
+
+external_storage_path: /data

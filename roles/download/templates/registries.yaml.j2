@@ -1,0 +1,33 @@
+mirrors:
+  local.io:
+    endpoint:
+      - "{{ registry_server_location }}"
+    rewrite:
+      "^(.*)": "library/$1"
+  docker.io:
+    endpoint:
+      - "{{ registry_server_location }}"
+    rewrite:
+      "^(.*)": "docker.io/$1"
+  quay.io:
+    endpoint:
+      - "{{ registry_server_location }}"
+    rewrite:
+      "^(.*)": "quay.io/$1"
+  ghcr.io:
+    endpoint:
+      - "{{ registry_server_location }}"
+    rewrite:
+      "^(.*)": "ghcr.io/$1"
+  k8s.gcr.io:
+    endpoint:
+      - "{{ registry_server_location }}"
+    rewrite:
+      "^(.*)": "k8s.gcr.io/$1"
+  registry.k8s.io:
+    endpoint:
+      - "{{ registry_server_location }}"
+    rewrite:
+      "^(.*)": "registry.k8s.io/$1"
+
+
